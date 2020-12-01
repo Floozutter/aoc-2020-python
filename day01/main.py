@@ -1,19 +1,16 @@
 INPUTPATH = "input.txt"
 #INPUTPATH = "input-test.txt"
-
 with open(INPUTPATH) as ifile:
     filetext = ifile.read()
-
 data = [int(line) for line in filetext.split()]
 
-numbers = set()
-for n in data:
-	if (2020 - n) in numbers:
-		a = n
-		b = 2020 - n
+seen = set()
+for a in data:
+	b = 2020 - a
+	if b in seen:
 		break
 	else:
-		numbers.add(n)
+		seen.add(a)
 print(a * b)
 
 from itertools import combinations
