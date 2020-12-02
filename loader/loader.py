@@ -1,6 +1,6 @@
 import requests
 
-AOC2020_URL = "https://adventofcode.com/2020/day/?/input"
+AOC2020_URL = "https://adventofcode.com/2020/day/{?}/input"
 COOKIEPATH = "sessioncookie.txt"
 
 def get_sessioncookie() -> str:
@@ -17,7 +17,7 @@ day = int(input("Enter Advent of Code Day: "))
 assert 1 <= day <= 25, "Invalid day!"
 
 # Request data from AoC website by formatting url.
-data = request_inputdottxt(AOC2020_URL.replace("?", str(day)))
+data = request_inputdottxt(AOC2020_URL.replace("{?}", str(day)))
 
 # Write the "input.txt" output file in the same directory.
 with open("input.txt", mode="w") as ofile:
