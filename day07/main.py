@@ -4,36 +4,31 @@ with open(INPUTPATH) as ifile:
     filetext = ifile.read()
 data = [chunk for chunk in filetext.strip().split("\n") if chunk]
 
-rules = dict()
+from typing import Dict
+rules: Dict[str, Dict[str, int]] = dict()
 for line in data:
-	container, contained = line.split(" bags contain ")
-	if contained == "no other bags.":
-		rules[container] = dict()
-	else:
-		rules[container] = dict(
-			(words[1] + " " + words[2], int(words[0]))
-			for words in (s.split() for s in contained.split(", "))
-		)
+	bag, helds = line.split(" bags contain ")
+	rules[bag] = dict(
+		(words[1] + " " + words[2], int(words[0]))
+		for words in (s.split() for s in helds.split(", "))
+	) if helds != "no other bags." else dict()
 
-from typing import Set
-def can_carry(
-	container: str,
-	contained: str,
-	visited: Set[str]
-) -> bool:
-	visited.add(container)
-	if contained in rules[container]:
-		return True
-	else:
-		for bag in rules[container]:
-			if bag not in visited and can_carry(bag, contained, visited):
-				return True
+from typing import Set, Optional
+def holds(bag: str, target: str, visited: Optional[Set[str]] = None) -> bool:
+	visited = set() if visited is None else visited
+	if bag in visited:
 		return False
-print(sum(1 for bag in rules if can_carry(bag, "shiny gold", set())))
+	else:
+		visited.add(bag)
+		return any(
+			held == target or holds(held, target, visited)
+			for held in rules[bag]
+		)
+print(sum(1 for bag in rules if holds(bag, "shiny gold")))
 
-def must_carry(container: str) -> int:
-	total = 0
-	for bag, n in rules[container].items():
-		total += n * (1 + must_carry(bag))
-	return total
-print(must_carry("shiny gold"))
+def hold_count(bag: str) -> int:
+	return sum(
+		n * (1 + hold_count(held))
+		for held, n in rules[bag].items()
+	)
+print(hold_count("shiny gold"))
