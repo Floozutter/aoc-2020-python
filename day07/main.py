@@ -13,17 +13,11 @@ for line in data:
 		for words in (s.split() for s in helds.split(", "))
 	) if helds != "no other bags." else dict()
 
-from typing import Set, Optional
-def holds(bag: str, target: str, visited: Optional[Set[str]] = None) -> bool:
-	visited = set() if visited is None else visited
-	if bag in visited:
-		return False
-	else:
-		visited.add(bag)
-		return any(
-			held == target or holds(held, target, visited)
-			for held in rules[bag]
-		)
+def holds(bag: str, target: str) -> bool:
+	return any(
+		held == target or holds(held, target)
+		for held in rules[bag]
+	)
 print(sum(1 for bag in rules if holds(bag, "shiny gold")))
 
 def hold_count(bag: str) -> int:
