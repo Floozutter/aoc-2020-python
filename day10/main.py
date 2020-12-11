@@ -18,7 +18,7 @@ from functools import cache
 @cache
 def paths(source: int, dest: int) -> int:
 	return sum(
-		1 if adjacent == dest else paths(adjacent, dest)
-		for adjacent in graph[source]
+		1 if neighbor == dest else paths(neighbor, dest)
+		for neighbor in graph[source]
 	)
 print(paths(adapters[0], adapters[-1]))
