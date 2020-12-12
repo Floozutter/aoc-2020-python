@@ -19,9 +19,6 @@ visits = OrderedDict((adp, 0) for adp in adapters)
 visits[adapters[0]] += 1
 while visits:
 	vertex, n = visits.popitem(False)
-	if vertex == adapters[-1]:
-		break
-	else:
-		for neighbor in graph[vertex]:
-			visits[neighbor] += n
+	for neighbor in graph[vertex]:
+		visits[neighbor] += n
 print(n)
