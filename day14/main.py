@@ -6,12 +6,13 @@ data = [chunk for chunk in filetext.strip().split("\n")]
 
 from typing import List
 def ground(floating: str) -> List[str]:
-	for i, bit in enumerate(floating):
-		if bit == "X":
-			a = floating[: i] + "0" + floating[i + 1:]
-			b = floating[: i] + "1" + floating[i + 1:]
-			return ground(a) + ground(b)
-	return [floating]
+	index = floating.find("X")
+	if index == -1:
+		return [floating]
+	else:
+		a = floating[: index] + "0" + floating[index + 1:]
+		b = floating[: index] + "1" + floating[index + 1:]
+		return ground(a) + ground(b)
 
 memory1 = dict()
 memory2 = dict()
