@@ -4,32 +4,19 @@ with open(INPUTPATH) as ifile:
     filetext = ifile.read()
 data = [int(chunk) for chunk in filetext.strip().split(",")]
 
-from collections import defaultdict
-spoken = defaultdict(list)
-last = None
-for i in range(2020):
-	if i < len(data):
-		spoke = data[i]
-	elif last not in spoken or len(spoken[last]) < 2:
-		spoke = 0
-	else:
-		spoke = spoken[last][-1] - spoken[last][-2]
-	spoken[spoke].append(i)
-	last = spoke
-print(last)
+from collections import deque, defaultdict
+from functools import partial
+from typing import Sequence, Optional
+def nth_number_spoken(starting: Sequence[int], n: int) -> int:
+	if n <= len(starting):
+		return starting[n - 1]
+	spoken = defaultdict(partial(deque, maxlen=2))
+	for i, z in enumerate(starting):
+		spoken[z].append(i)
+	for i in range(i + 1, n):
+		z = spoken[z][-1] - spoken[z][-2] if len(spoken[z]) >= 2 else 0
+		spoken[z].append(i)
+	return z
 
-spoken = defaultdict(list)
-last = None
-for i in range(30000000):
-	#if (i % 1000000 == 0): print(i)
-	if i < len(data):
-		spoke = data[i]
-	elif last not in spoken or len(spoken[last]) < 2:
-		spoke = 0
-	else:
-		spoke = spoken[last][-1] - spoken[last][-2]
-	spoken[spoke].append(i)
-	if len(spoken[spoke]) > 2:
-		spoken[spoke] = spoken[spoke][-2:]
-	last = spoke
-print(last)
+print(nth_number_spoken(data, 2020))
+print(nth_number_spoken(data, 30_000_000))
