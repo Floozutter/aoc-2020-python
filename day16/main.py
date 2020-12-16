@@ -4,54 +4,51 @@ with open(INPUTPATH) as ifile:
     filetext = ifile.read()
 data = [chunk for chunk in filetext.strip().split("\n\n")]
 
-from typing import Tuple, List
-def parse_rule(line: str) -> Tuple[str, List[Tuple[int, int]]]:
+from typing import Tuple
+IntervalPair = Tuple[int, int, int, int]
+def parse_rule(line: str) -> Tuple[str, IntervalPair]:
 	field, right = line.split(": ")
-	ranges = [tuple(map(int, pair.split("-"))) for pair in right.split("or")]
-	return field, ranges
+	a, b, c, d = (int(z) for p in right.split("or") for z in p.split("-"))
+	return field, (a, b, c, d)
+def within(z: int, ip: IntervalPair) -> bool:
+	return ip[0] <= z <= ip[1] or ip[2] <= z <= ip[3]
 rules = dict(map(parse_rule, data[0].split("\n")))
 mine = list(map(int, data[1].split("\n")[1].split(",")))
 nearby = [list(map(int, line.split(","))) for line in data[2].split("\n")[1:]]
 
-valids = []
-error = 0
-for ticket in nearby:
-	valid = True
-	for value in ticket:
-		ok = False
-		for ab, cd in rules.values():
-			a, b = ab
-			c, d = cd
-			if a <= value <= b or c <= value <= d:
-				ok = True
-		if not ok:
-			valid = False
-			error += value
-	if valid:
-		valids.append(ticket)
-print(error)
+print(sum(
+	value for ticket in nearby for value in ticket
+	if all(not within(value, ip) for ip in rules.values())
+))
 
-def within(z: int, interval: Tuple[int, int]) -> bool:
-	return interval[0] <= z <= interval[1]
-from collections import defaultdict
-index_to_field = defaultdict(set)
-for field, terval_pairs in rules.items():
-	a, b = terval_pairs
-	for i in range(len(mine)):
-		if all(
-			within(ticket[i], a) or within(ticket[i], b)
-			for ticket in valids
-		):
-			index_to_field[i].add(field)
+valids = [
+	ticket.copy() for ticket in nearby
+	if all(
+		any(within(value, ip) for ip in rules.values())
+		for value in ticket
+	)
+]
+field_to_indices = dict(
+	(field, set(
+		i for i in range(len(rules))
+		if all(within(ticket[i], ip) for ticket in valids)
+	))
+	for field, ip in rules.items()
+)
 solved = set()
-while any(len(fields) > 1 for fields in index_to_field.values()):
-	for i, f in index_to_field.items():
-		if len(f) == 1:
-			solved.add(next(iter(f)))
+while any(len(indices) > 1 for indices in field_to_indices.values()):
+	for indices in field_to_indices.values():
+		if len(indices) == 1:
+			solved.add(next(iter(indices)))
 		else:
-			f -= solved
-lol = 1
-for i, v in enumerate(mine):
-	if "departure" in next(iter(index_to_field[i])):
-		lol *= v
-print(lol)
+			indices -= solved
+from collections import defaultdict
+index_to_field = defaultdict(str, (
+	(next(iter(indices)) if indices else -1, field)
+	for field, indices in field_to_indices.items()
+))
+from math import prod
+print(prod(
+	value for i, value in enumerate(mine)
+	if index_to_field[i].startswith("departure")
+))
