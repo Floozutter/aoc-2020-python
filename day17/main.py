@@ -5,73 +5,33 @@ with open(INPUTPATH) as ifile:
 data = [chunk for chunk in filetext.strip().split()]
 
 from typing import Set, Tuple, Iterator
-Coord = Tuple[int, int, int]
-active = set()
-for i, row in enumerate(data):
-	for j, state in enumerate(row):
-		if state == "#":
-			active.add((i, j, 0))
-
-def neighbors(coord: Coord) -> Iterator[Coord]:
-	uwu = (-1, 0, 1)
-	for dx in uwu:
-		for dy in uwu:
-			for dz in uwu:
-				if any((dx, dy, dz)):
-					yield (coord[0] + dx, coord[1] + dy, coord[2] + dz)
-def update(active: Set[Coord]) -> Set[Coord]:
-	ret = set()
-	uwu = set()
-	for coord in active:
-		uwu.add(coord)
-		uwu.update(neighbors(coord))
-	for coord in uwu:
-		n = sum(1 for neighbor in neighbors(coord) if neighbor in active)
-		if coord in active:
-			if 2 <= n <= 3:
-				ret.add(coord)
+Coordinate = Tuple[int, ...]
+from itertools import product
+def neighbors(coord: Coordinate) -> Iterator[Coordinate]:
+	return (
+		tuple(sum(pair) for pair in zip(coord, diff))
+		for diff in product((-1, 0, 1), repeat = len(coord))
+		if any(diff)
+	)
+def update(pocket: Set[Coordinate]) -> Set[Coordinate]:
+	def activating(coord: Coordinate) -> bool:
+		n = sum(1 for neigh in neighbors(coord) if neigh in pocket)
+		if coord in pocket:
+			return 2 <= n <= 3
 		else:
-			if n == 3:
-				ret.add(coord)
-	return ret
-for i in range(6):
-	active = update(active)
-print(len(active))
+			return n == 3
+	neighs = set(neigh for active in pocket for neigh in neighbors(active))
+	return set(filter(activating, pocket | neighs))
 
-Coord2 = Tuple[int, int, int, int]
-active2 = set()
-for i, row in enumerate(data):
-	for j, state in enumerate(row):
-		if state == "#":
-			active2.add((i, j, 0, 0))
-def neighbors2(coord: Coord2) -> Iterator[Coord2]:
-	uwu = (-1, 0, 1)
-	for dx in uwu:
-		for dy in uwu:
-			for dz in uwu:
-				for dw in uwu:
-					if any((dx, dy, dz, dw)):
-						yield (
-							coord[0] + dx,
-							coord[1] + dy,
-							coord[2] + dz,
-							coord[3] + dw
-						)
-def update2(active: Set[Coord2]) -> Set[Coord2]:
-	ret = set()
-	uwu = set()
-	for coord in active:
-		uwu.add(coord)
-		uwu.update(neighbors2(coord))
-	for coord in uwu:
-		n = sum(1 for neighbor in neighbors2(coord) if neighbor in active)
-		if coord in active:
-			if 2 <= n <= 3:
-				ret.add(coord)
-		else:
-			if n == 3:
-				ret.add(coord)
-	return ret
-for i in range(6):
-	active2 = update2(active2)
-print(len(active2))
+pocket3: Set[Coordinate] = set(
+	(i, j, 0)
+	for i, row in enumerate(data)
+	for j, c in enumerate(row)
+	if c == "#"
+)
+pocket4: Set[Coordinate] = set((i, j, k, 0) for i, j, k in pocket3)
+for _ in range(6):
+	pocket3 = update(pocket3)
+	pocket4 = update(pocket4)
+print(len(pocket3))
+print(len(pocket4))
