@@ -30,8 +30,6 @@ pocket3: Set[Coordinate] = set(
 	if c == "#"
 )
 pocket4: Set[Coordinate] = set((i, j, k, 0) for i, j, k in pocket3)
-for _ in range(6):
-	pocket3 = update(pocket3)
-	pocket4 = update(pocket4)
-print(len(pocket3))
-print(len(pocket4))
+print(len(update(update(update(update(update(update(pocket3))))))))
+print(len(update(update(update(update(update(update(pocket4))))))))
+
