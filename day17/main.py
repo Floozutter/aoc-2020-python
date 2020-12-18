@@ -32,4 +32,3 @@ pocket3: Set[Coordinate] = set(
 pocket4: Set[Coordinate] = set((i, j, k, 0) for i, j, k in pocket3)
 print(len(update(update(update(update(update(update(pocket3))))))))
 print(len(update(update(update(update(update(update(pocket4))))))))
-
