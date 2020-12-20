@@ -5,7 +5,6 @@ with open(INPUTPATH) as ifile:
     filetext = ifile.read()
 data = [chunk for chunk in filetext.strip().split("\n\n")]
 
-
 from typing import Tuple, Set, Union, Iterator, Dict
 Subrule = Union[str, Set[Tuple[str, ...]]]
 def read_rule(r: str) -> Subrule:
