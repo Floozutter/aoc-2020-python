@@ -14,12 +14,13 @@ class Cup:
 			self.succ = self
 		else:
 			self.succ = succ
-	def insert_succ(self, label: int) -> None:
-		self.succ = Cup(label, self.succ)
-	def remove_succ(self) -> int:
-		removed = self.succ
-		self.succ = removed.succ
-		return removed.label
+	def insert_succ(self, cup: "Cup") -> None:
+		cup.succ = self.succ
+		self.succ = cup
+	def remove_succ(self) -> "Cup":
+		succ = self.succ
+		self.succ = succ.succ
+		return succ
 	def labels(self) -> Iterator[int]:
 		yield self.label
 		cup = self.succ
@@ -43,20 +44,14 @@ def play(head: Cup, moves: int) -> Cup:
 	cups = dict((cup.label, cup) for cup in head.cups())
 	lowest, highest = min(cups), max(cups)
 	for _ in range(moves):
-		picks = []
-		for _ in range(3):
-			label = head.remove_succ()
-			del cups[label]
-			picks.append(label)
-		dest_label = head.label - 1
-		while (a := dest_label < lowest) or (b := dest_label in picks):
-			if a: dest_label = highest
-			else: dest_label -= 1
-		dest = cups[dest_label]
-		while picks:
-			label = picks.pop()
-			dest.insert_succ(label)
-			cups[label] = dest.succ
+		picked = [head.remove_succ() for _ in range(3)]
+		picked_labels = {cup.label for cup in picked}
+		dest = head.label - 1
+		while (a := dest < lowest) or (b := dest in picked_labels):
+			if a: dest = highest
+			else: dest -= 1
+		while picked:
+			cups[dest].insert_succ(picked.pop())
 		head = head.succ
 	return cups[1]
 
