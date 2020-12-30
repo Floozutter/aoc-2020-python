@@ -31,10 +31,6 @@ def combine_coprime(a: Congruence, b: Congruence) -> Congruence:
 	mod = a.mod * b.mod
 	x, y = bezout_coefs(a.mod, b.mod)
 	return Congruence(mod, (x * a.mod * b.to + y * b.mod * a.to) % mod)
-congruences = (
-	Congruence(bus, (bus - i) % bus)
-	for i, bus in enumerate(buses)
-	if bus
-)
+congruences = (Congruence(bus, bus - i) for i, bus in enumerate(buses) if bus)
 from functools import reduce
 print(reduce(combine_coprime, congruences).to)
